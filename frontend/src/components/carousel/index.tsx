@@ -20,7 +20,6 @@ export interface Banner_Inter extends BannerProp_Inter {
 interface CarouselProps_Inter {
   /** 轮播列表 */
   list: Banner_Inter[];
-
   /** 单个轮播图停留时间，单位ms */
   period?: number;
 }
@@ -34,7 +33,6 @@ const Carousel: FC<CarouselProps_Inter> = ({ list = [], period = 3000 }) => {
   /** 索引变更 */
   const next = useCallback(() => {
     const newIndex = currentIndex! < list.length - 1 ? currentIndex! + 1 : 0;
-
     setCurrentIndex(newIndex);
   }, [currentIndex, list.length]);
 
@@ -44,7 +42,6 @@ const Carousel: FC<CarouselProps_Inter> = ({ list = [], period = 3000 }) => {
   /** 开始计时 */
   useEffect(() => {
     intervalRef.current = Number(setTimeout(next, period));
-
     return () => clearTimeout(intervalRef.current);
   }, [next, period]);
 
@@ -68,9 +65,9 @@ const Carousel: FC<CarouselProps_Inter> = ({ list = [], period = 3000 }) => {
   const indicators = useMemo(
     () =>
       list.map(({ id }, index) => (
-        <Indicator key={id} active={index === currentIndex} />
+        <Indicator key={id} active={index === currentIndex} period={period} />
       )),
-    [list, currentIndex]
+    [list, currentIndex, period]
   );
 
   return (
