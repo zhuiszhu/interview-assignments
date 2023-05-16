@@ -1,7 +1,6 @@
 import React, {
   CSSProperties,
   FC,
-  ReactElement,
   useCallback,
   useEffect,
   useMemo,
@@ -14,25 +13,19 @@ import "./index.css";
 import Banner, { BannerProp_Inter } from "./Banner";
 import Indicator from "./Indicator";
 
-/** 单个轮播图停留时间，单位ms */
-const PERIOD = 3000;
-
 export interface Banner_Inter extends BannerProp_Inter {
   id: number;
 }
 
-export interface BannerListProps_Inter {
-  banners: Banner_Inter[];
-  currentIndex?: number;
-}
-
-export const Context = React.createContext({});
-
-interface CarouselProps {
+interface CarouselProps_Inter {
+  /** 轮播列表 */
   list: Banner_Inter[];
+
+  /** 单个轮播图停留时间，单位ms */
+  period?: number;
 }
 
-const Carousel: FC<CarouselProps> = ({ list = [] }) => {
+const Carousel: FC<CarouselProps_Inter> = ({ list = [], period = 3000 }) => {
   const intervalRef = useRef<number>();
 
   /** 当前播放的轮播图索引 */
@@ -50,15 +43,20 @@ const Carousel: FC<CarouselProps> = ({ list = [] }) => {
 
   /** 开始计时 */
   useEffect(() => {
-    intervalRef.current = Number(setTimeout(next, PERIOD));
+    intervalRef.current = Number(setTimeout(next, period));
 
     return () => clearTimeout(intervalRef.current);
-  }, [next]);
+  }, [next, period]);
 
-  const style: CSSProperties = {
-    left: `-${currentIndex}00%`,
-  };
+  /** 轮播图队列定位控制 */
+  const bannerListstyle: CSSProperties = useMemo(
+    () => ({
+      left: `-${currentIndex}00%`,
+    }),
+    [currentIndex]
+  );
 
+  /** 轮播图队列 */
   const banners = useMemo(
     () =>
       list.map(({ id, ...info }, index) => (
@@ -66,6 +64,7 @@ const Carousel: FC<CarouselProps> = ({ list = [] }) => {
       )),
     [list]
   );
+  /** 指示器队列 */
   const indicators = useMemo(
     () =>
       list.map(({ id }, index) => (
@@ -79,7 +78,7 @@ const Carousel: FC<CarouselProps> = ({ list = [] }) => {
       <div
         data-testid="banner-list"
         className="banner-list-control"
-        style={style}
+        style={bannerListstyle}
       >
         {banners}
       </div>
